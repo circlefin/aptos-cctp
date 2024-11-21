@@ -1,0 +1,31 @@
+{
+  "words": [
+    "struct",
+    "structs",
+    "aptos",
+    "CCTP",
+    "keccak",
+    "secp",
+    "mvcov",
+    "upsert",
+    "foundryup",
+    "keypair",
+    "pausable",
+    "DOCROOT",
+    "localnet",
+    "pkill",
+    "dispatchable",
+    "fullnode",
+  ],
+  "useGitignore": true,
+  "patterns": [
+    {
+      "name": "error_codes",
+      "pattern": "\\bE([A-Z_]+)\\b"
+    }
+  ],
+  "ignoreRegExpList": [
+    "error_codes"
+  ],
+  "ignorePaths": ["aptos-core", "stablecoin-aptos", "evm-cctp-contracts"]
+}

@@ -1,0 +1,7 @@
+build/
+.idea
+
+dist
+node_modules
+
+logs
