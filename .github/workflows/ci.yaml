@@ -1,0 +1,114 @@
+# Copyright (c) 2024, Circle Internet Group, Inc.
+# All rights reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Continuous Integration
+on:
+  pull_request:
+  push:
+    branches: [master]
+jobs:
+  run-message-transmitter-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+        with:
+          submodules: "true"
+
+      - name: Install Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: "20.14.0"
+
+      - name: Compile and Run Tests
+        run: |
+          make setup
+          make message-transmitter-coverage
+          make verify-message-transmitter-coverage
+
+  run-token-messenger-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+        with:
+          submodules: "true"
+
+      - name: Install Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: "20.14.0"
+
+      - name: Compile and Run Tests
+        run: |
+          make setup
+          make token-messenger-minter-coverage
+          make verify-token-messenger-minter-coverage
+
+  run-e2e-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+        with:
+          submodules: "true"
+
+      - name: Install Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: "20.14.0"
+
+      - name: Compile and Run Tests
+        run: |
+          ./docker-start-containers.sh
+          sleep 30
+          make compile-scripts
+          yarn test:e2e
+
+  spell-checker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+
+      - name: Install Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: "20.14.0"
+
+      - name: Compile and Run Tests
+        run: |
+          npm install -g cspell@latest
+          cspell **
+
+  scan:
+    needs:
+      - run-message-transmitter-tests
+      - run-token-messenger-tests
+      - run-e2e-tests
+      - spell-checker
+    if: github.event_name == 'pull_request'
+    uses: circlefin/circle-public-github-workflows/.github/workflows/pr-scan.yaml@v1
+
+  release-sbom:
+    needs:
+      - run-message-transmitter-tests
+      - run-token-messenger-tests
+      - run-e2e-tests
+      - spell-checker
+    if: github.event_name == 'push'
+    uses: circlefin/circle-public-github-workflows/.github/workflows/attach-release-assets.yaml@v1

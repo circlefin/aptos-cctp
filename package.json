@@ -1,0 +1,52 @@
+{
+  "name": "aptos-cctp",
+  "version": "1.0.0",
+  "description": "Circle's Aptos CCTP Smart Contracts",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://github.com/circlefin/aptos-cctp.git"
+  },
+  "license": "Apache-2.0",
+  "scripts": {
+    "build": "yarn",
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix .",
+    "test:e2e": "yarn build && yarn jest",
+    "calculate-deployment-addresses": "yarn ts-node typescript/aptos/deploy/index.ts calculate-deployment-addresses",
+    "deploy": "yarn ts-node typescript/aptos/deploy/index.ts deploy",
+    "upgrade-pkg": "yarn ts-node typescript/aptos/deploy/index.ts upgrade",
+    "verify-pkg": "yarn ts-node typescript/aptos/deploy/index.ts verify-pkg"
+  },
+  "dependencies": {
+    "@aptos-labs/ts-sdk": "^1.28.0",
+    "@jest/globals": "^29.3.1",
+    "commander": "^12.1.0",
+    "dotenv": "^16.4.5",
+    "@ethereumjs/util": "^9.1.0",
+    "ts-jest": "^29.2.5",
+    "ts-node": "^10.9.2",
+    "wait-for-expect": "^3.0.2",
+    "web3": "^4.13.0"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.13.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^8.0.1",
+    "eslint-config-airbnb-typescript": "^17.0.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-import": "^2.25.2",
+    "eslint-plugin-prefer-arrow": "^1.2.3",
+    "eslint-plugin-prettier": "^4.2.1",
+    "eslint-plugin-simple-import-sort": "^7.0.0",
+    "jest": "^28.1.3",
+    "jest-junit": "^14.0.0",
+    "prettier": "^2.7.1",
+    "prettier-eslint": "^16.3.0",
+    "typescript": "^4.7.4"
+  },
+  "engines": {
+    "node": "20.14.0",
+    "yarn": "1.22.22"
+  }
+}
