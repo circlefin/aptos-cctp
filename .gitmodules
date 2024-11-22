@@ -1,0 +1,9 @@
+[submodule "evm-cctp-contracts"]
+	path = evm-cctp-contracts
+	url = git@github.com:circlefin/evm-cctp-contracts.git
+[submodule "aptos-core"]
+	path = aptos-core
+	url = git@github.com:aptos-labs/aptos-core.git
+[submodule "stablecoin-aptos"]
+	path = stablecoin-aptos
+	url = git@github.com:circlefin/stablecoin-aptos.git
