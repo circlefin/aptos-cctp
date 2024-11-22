@@ -433,6 +433,8 @@ module message_transmitter::message_transmitter {
     use aptos_framework::account::{Self, create_signer_for_test};
     #[test_only]
     use aptos_extensions::ownable::OwnerRole;
+    #[test_only]
+    use aptos_extensions::pausable::PauseState;
 
     // Test Helper Functions
 

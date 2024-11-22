@@ -16,6 +16,7 @@
     "pkill",
     "dispatchable",
     "fullnode",
+    "circlefin"
   ],
   "useGitignore": true,
   "patterns": [
