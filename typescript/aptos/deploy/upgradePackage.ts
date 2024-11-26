@@ -66,7 +66,7 @@ async function upgradePackage({
 }
 
 /*
-Example - yarn upgrade-pkg --privateKey=0x2a21243e81673efb747604a02e72e4f7c70229e4389629f96c646e385358b121 --rpc=http://localhost:8080 --payloadFilePath=upgrade.json --aptosExtensionsPackageId=0x9b43208bdff59a953f929309b1238ad0126a471002796261f8ce936c59917efb --packageId=0x66535c727de1d398a82593bec9b90be36385f9ad28cc48852123404adbf9bccf
+Example - yarn upgrade-pkg --privateKey=<privateKey> --rpc=http://localhost:8080 --payloadFilePath=upgrade.json --aptosExtensionsPackageId=0x9b43208bdff59a953f929309b1238ad0126a471002796261f8ce936c59917efb --packageId=0x66535c727de1d398a82593bec9b90be36385f9ad28cc48852123404adbf9bccf
 */
 
 export default program
