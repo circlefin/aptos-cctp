@@ -64,15 +64,6 @@ describe("End to End Tests", () => {
   let secondaryMinterController: Ed25519Account;
   let secondaryMinter: Ed25519Account;
 
-  /*
-  Using a fixed private key (account address: 0x5ba1674a3ffa843ed88aa4a0a051b9a52f76459a8853e5cd62b22bcc488d2765) for testing purposes
-  This should result in the following package ids:
-  - Aptos Extensions Package ID: 0x9b43208bdff59a953f929309b1238ad0126a471002796261f8ce936c59917efb
-  - Stablecoin Package ID: 0xf8e95ec344bb3fa74d2539fe15a01094ab3746ed3782c740e8befdd37e8095c7
-  - Message Transmitter Package ID: 0x66535c727de1d398a82593bec9b90be36385f9ad28cc48852123404adbf9bccf
-  - Token Messenger Minter Package ID: 0x1ace45fcb631c325dbe47c5e543e2744b23f9cb4d859ed16496f5c117bd73245
-  */
-  const aptosPrivateKey = "0x2a21243e81673efb747604a02e72e4f7c70229e4389629f96c646e385358b121";
   const evmUserAddress = "0xfabb0ac9d68b0b445fb7357272ff202c5651694a";
   const usdcContractAddress = `${process.env.EVM_USDC_ADDRESS}`;
 
@@ -94,7 +85,7 @@ describe("End to End Tests", () => {
 
   const setupAptos = async () => {
     aptos = getAptosClient();
-    deployer = await generateFundedAccountFromPrivateKey(aptos, aptosPrivateKey);
+    deployer = await generateFundedAccount(aptos);
     messageTransmitterClient = new MessageTransmitterClient(aptos, deployer);
     tokenMessengerMinterClient = new TokenMessengerMinterClient(aptos, deployer);
     aptosExtensionsClient = new AptosExtensionsClient(aptos, deployer);
