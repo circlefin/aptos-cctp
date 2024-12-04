@@ -54,13 +54,13 @@ module message_transmitter::state {
 
     public(friend) fun init_state(
         owner: &signer,
-        admin: &signer,
+        object_signer: &signer,
         local_domain: u32,
         version: u32,
         max_message_body_size: u64
     ) {
         move_to(
-            admin,
+            object_signer,
             State {
                 local_domain,
                 version,
@@ -132,10 +132,6 @@ module message_transmitter::state {
     // ---------- Setters ----------
     // -----------------------------
 
-    public(friend) fun set_version(version: u32) acquires State {
-        borrow_global_mut<State>(get_object_address()).version = version
-    }
-
     public(friend) fun set_max_message_body_size(max_message_body_size: u64) acquires State {
         borrow_global_mut<State>(get_object_address()).max_message_body_size = max_message_body_size
     }
@@ -184,7 +180,7 @@ module message_transmitter::state {
     use aptos_extensions::pausable::{Self, PauseState};
 
     #[test_only]
-    public(friend) fun init_test_state(caller: &signer) {
+    public fun init_test_state(caller: &signer) {
         let resource_account_address = account::create_resource_address(&@deployer, b"test_seed_mt");
         let resource_account_signer = create_signer_for_test(resource_account_address);
         let constructor_ref = object::create_named_object(&resource_account_signer, SEED_NAME);
@@ -202,6 +198,11 @@ module message_transmitter::state {
     #[test_only]
     public fun set_owner(owner_address: address) {
         ownable::set_owner_for_testing(get_object_address(), owner_address);
+    }
+
+    #[test_only]
+    public fun set_version(version: u32) acquires State {
+        borrow_global_mut<State>(get_object_address()).version = version
     }
 
     // -----------------------------
@@ -280,14 +281,6 @@ module message_transmitter::state {
     // -----------------------------
     // ---------- Setters ----------
     // -----------------------------
-
-    #[test(owner = @message_transmitter)]
-    fun test_set_version(owner: &signer) acquires State {
-        init_test_state(owner);
-        let version = 10;
-        set_version(version);
-        assert!(get_version() == version, 0);
-    }
 
     #[test(owner = @message_transmitter)]
     fun test_set_max_message_body_size(owner: &signer) acquires State {

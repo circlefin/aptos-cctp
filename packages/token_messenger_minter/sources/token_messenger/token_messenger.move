@@ -42,11 +42,9 @@ module token_messenger_minter::token_messenger {
     const ENO_TOKEN_MESSENGER_SET_FOR_DOMAIN: u64 = 6;
     const ENOT_TOKEN_MESSENGER: u64 = 7;
     const EINVALID_MESSAGE_BODY_VERSION: u64 = 8;
-    const ENOT_LOCAL_MESSAGE_TRANSMITTER: u64 = 9;
-    const ERECIPIENT_NOT_TOKEN_MESSENGER: u64 = 10;
-    const ENOT_OWNER: u64 = 11;
-    const EUNSUPPORTED_DESTINATION_DOAMIN: u64 = 12;
-    const EINVALID_TOKEN_MESSENGER_ADDRESS: u64 = 13;
+    const ERECIPIENT_NOT_TOKEN_MESSENGER: u64 = 9;
+    const EUNSUPPORTED_DESTINATION_DOAMIN: u64 = 10;
+    const EINVALID_TOKEN_MESSENGER_ADDRESS: u64 = 11;
 
     // Constants
     const MAX_U64: u256 = 18_446_744_073_709_551_615;
@@ -103,6 +101,12 @@ module token_messenger_minter::token_messenger {
     #[view]
     public fun num_remote_token_messengers(): u64 {
         state::get_num_remote_token_messengers()
+    }
+
+    #[view]
+    public fun max_burn_amount_per_message(token: address): u64 {
+        let (_, max_burn_amount) = state::get_max_burn_limit_per_message_for_token(token);
+        max_burn_amount
     }
 
     // -----------------------------
@@ -189,22 +193,20 @@ module token_messenger_minter::token_messenger {
 
         // Create new message body based on updated mint recipient
         let mint_recipient = option::get_with_default(new_mint_recipient, old_mint_recipient);
-        if (mint_recipient != old_mint_recipient) {
-            assert!(mint_recipient != @0x0, error::invalid_argument(EINVALID_MINT_RECIPIENT_ADDRESS));
-            let new_burn_message = burn_message::serialize(
-                message_body_version(),
-                burn_token,
-                mint_recipient,
-                amount,
-                original_message_sender
-            );
-            option::fill(&mut message_body, new_burn_message);
-        };
+        assert!(mint_recipient != @0x0, error::invalid_argument(EINVALID_MINT_RECIPIENT_ADDRESS));
+        let new_burn_message = burn_message::serialize(
+            message_body_version(),
+            burn_token,
+            mint_recipient,
+            amount,
+            original_message_sender
+        );
+        option::fill(&mut message_body, new_burn_message);
 
         // Use Token Messenger Minter's signer for calling replace_message
-        let signer = token_messenger_minter::get_signer();
+        let token_messenger_minter_signer = token_messenger_minter::get_signer();
         message_transmitter::replace_message(
-            &signer,
+            &token_messenger_minter_signer,
             original_message,
             original_attestation,
             &message_body,
@@ -366,17 +368,17 @@ module token_messenger_minter::token_messenger {
         destination_caller: address,
         burn_message: &vector<u8>,
     ): u64 {
-        let signer = token_messenger_minter::get_signer();
+        let token_messenger_minter_signer = token_messenger_minter::get_signer();
         if (destination_caller == @0x0) {
             message_transmitter::send_message(
-                &signer,
+                &token_messenger_minter_signer,
                 destination_domain,
                 destination_token_messenger,
                 burn_message
             )
         } else {
             message_transmitter::send_message_with_caller(
-                &signer,
+                &token_messenger_minter_signer,
                 destination_domain,
                 destination_token_messenger,
                 destination_caller,
@@ -403,11 +405,15 @@ module token_messenger_minter::token_messenger {
     #[test_only]
     use std::hash;
     #[test_only]
+    use std::vector;
+    #[test_only]
     use aptos_std::from_bcs;
     #[test_only]
     use aptos_framework::account::create_signer_for_test;
     #[test_only]
     use aptos_extensions::pausable;
+    #[test_only]
+    use message_transmitter::message_transmitter::MessageSent;
     #[test_only]
     use message_transmitter::state as mt_state;
     #[test_only]
@@ -523,7 +529,7 @@ module token_messenger_minter::token_messenger {
     }
 
     #[test(owner = @deployer)]
-    #[expected_failure(abort_code = 0x1000c, location = Self)]
+    #[expected_failure(abort_code = 0x1000a, location = Self)]
     fun test_deposit_for_burn_invalid_destination_domain(owner: &signer) {
         init_test_token_messenger(owner);
         let amount = 51;
@@ -608,7 +614,7 @@ module token_messenger_minter::token_messenger {
     }
 
     #[test(owner = @deployer)]
-    #[expected_failure(abort_code = 0x1000c, location = Self)]
+    #[expected_failure(abort_code = 0x1000a, location = Self)]
     fun test_deposit_for_burn_with_caller_invalid_destination_domain(owner: &signer) {
         init_test_token_messenger(owner);
         let amount = 12;
@@ -708,6 +714,10 @@ module token_messenger_minter::token_messenger {
            destination_token_messenger: REMOTE_TOKEN_MESSENGER,
            destination_caller: new_destination_caller
        }), 0);
+       let message_sent_event = vector::borrow(&event::emitted_events<MessageSent>(), 0);
+       let message = message_transmitter::get_message_from_event(message_sent_event);
+       let new_burn_message = message::get_message_body(&message);
+       assert!(burn_message::get_version(&new_burn_message) == message_body_version(), 0);
        assert!(get_signer_balance(owner) == original_account_balance, 0);
    }
 
@@ -736,6 +746,77 @@ module token_messenger_minter::token_messenger {
             destination_token_messenger: REMOTE_TOKEN_MESSENGER,
             destination_caller: message::get_destination_caller(&original_message)
         }), 0);
+        let message_sent_event = vector::borrow(&event::emitted_events<MessageSent>(), 0);
+        let message = message_transmitter::get_message_from_event(message_sent_event);
+        let new_burn_message = message::get_message_body(&message);
+        assert!(burn_message::get_version(&new_burn_message) == message_body_version(), 0);
+        assert!(get_signer_balance(owner) == original_account_balance, 0);
+    }
+
+    #[test(owner = @deployer)]
+    fun test_replace_deposit_for_burn_new_destination_caller_version_bump(owner: &signer) {
+        init_test_token_messenger(owner);
+        let original_account_balance = get_signer_balance(owner);
+        let new_destination_caller = @0xfab;
+        let (original_message, original_attestation) = get_valid_deposit_for_burn_message_and_attestation();
+        state::set_message_body_version(2);
+        replace_deposit_for_burn(
+            owner,
+            &original_message,
+            &original_attestation,
+            &option::some(new_destination_caller),
+            &option::none()
+        );
+
+        let burn_msg = message::get_message_body(&original_message);
+        assert!(event::was_event_emitted(&DepositForBurn {
+            nonce: message::get_nonce(&original_message),
+            burn_token: burn_message::get_burn_token(&burn_msg),
+            amount: (burn_message::get_amount(&burn_msg) as u64),
+            depositor: signer::address_of(owner),
+            mint_recipient: burn_message::get_mint_recipient(&burn_msg),
+            destination_domain: REMOTE_DOMAIN,
+            destination_token_messenger: REMOTE_TOKEN_MESSENGER,
+            destination_caller: new_destination_caller
+        }), 0);
+
+        let message_sent_event = vector::borrow(&event::emitted_events<MessageSent>(), 0);
+        let message = message_transmitter::get_message_from_event(message_sent_event);
+        let new_burn_message = message::get_message_body(&message);
+        assert!(burn_message::get_version(&new_burn_message) == message_body_version(), 0);
+        assert!(get_signer_balance(owner) == original_account_balance, 0);
+    }
+
+    #[test(owner = @deployer)]
+    fun test_replace_deposit_for_burn_new_mint_recipient_version_bump(owner: &signer) {
+        init_test_token_messenger(owner);
+        let new_mint_recipient = @0xfab;
+        let original_account_balance = get_signer_balance(owner);
+        let (original_message, original_attestation) = get_valid_deposit_for_burn_message_and_attestation();
+        state::set_message_body_version(2);
+        replace_deposit_for_burn(
+            owner,
+            &original_message,
+            &original_attestation,
+            &option::none(),
+            &option::some(new_mint_recipient),
+        );
+
+        let burn_msg = message::get_message_body(&original_message);
+        assert!(event::was_event_emitted(&DepositForBurn {
+            nonce: message::get_nonce(&original_message),
+            burn_token: burn_message::get_burn_token(&burn_msg),
+            amount: (burn_message::get_amount(&burn_msg) as u64),
+            depositor: signer::address_of(owner),
+            mint_recipient: new_mint_recipient,
+            destination_domain: REMOTE_DOMAIN,
+            destination_token_messenger: REMOTE_TOKEN_MESSENGER,
+            destination_caller: message::get_destination_caller(&original_message)
+        }), 0);
+        let message_sent_event = vector::borrow(&event::emitted_events<MessageSent>(), 0);
+        let message = message_transmitter::get_message_from_event(message_sent_event);
+        let new_burn_message = message::get_message_body(&message);
+        assert!(burn_message::get_version(&new_burn_message) == message_body_version(), 0);
         assert!(get_signer_balance(owner) == original_account_balance, 0);
     }
 
@@ -852,7 +933,7 @@ module token_messenger_minter::token_messenger {
     }
 
     #[test(owner = @deployer)]
-    #[expected_failure(abort_code = 0x1000d, location = Self)]
+    #[expected_failure(abort_code = 0x1000b, location = Self)]
     fun test_add_remote_token_messenger_zero_address(owner: &signer) {
         init_test_token_messenger(owner);
         add_remote_token_messenger(owner, 7, @0x0);
@@ -952,7 +1033,7 @@ module token_messenger_minter::token_messenger {
         owner = @deployer,
         destination_caller = @0x8a4edb71919e22728ffe9a925df33202328aca8d6e13be2c5f4e02b4370c8f71
     )]
-    #[expected_failure(abort_code = 0x1000a, location = Self)]
+    #[expected_failure(abort_code = 0x10009, location = Self)]
     fun test_handle_receive_message_invalid_message_recipient(owner: &signer, destination_caller: &signer) {
         init_test_token_messenger(owner);
         let burn_message = burn_message::serialize(
@@ -1035,5 +1116,12 @@ module token_messenger_minter::token_messenger {
     fun test_view_num_remote_token_messengers(owner: &signer) {
         init_test_token_messenger(owner);
         assert!(state::get_num_remote_token_messengers() == num_remote_token_messengers(), 0);
+    }
+
+    #[test(owner = @deployer)]
+    fun test_view_max_burn_amount_per_message(owner: &signer) {
+        init_test_token_messenger(owner);
+        let (_, max_burn_amount) = state::get_max_burn_limit_per_message_for_token(@stablecoin);
+        assert!(max_burn_amount_per_message(@stablecoin) == max_burn_amount, 0);
     }
 }

@@ -168,7 +168,7 @@ module token_messenger_minter::token_minter {
         treasury::test_configure_minter(&tmm_signer, 10_000_000);
 
         // Link the newly created FA
-        token_controller::link_token_pair(
+        token_controller::test_link_token_pair(
             owner,
             stablecoin::stablecoin_address(),
             REMOTE_DOMAIN,
@@ -176,7 +176,7 @@ module token_messenger_minter::token_minter {
         );
 
         // Set Burn Limit
-        token_controller::set_max_burn_amount_per_message(
+        token_controller::test_set_max_burn_amount_per_message(
             owner,
             stablecoin::stablecoin_address(),
             1_000_000
@@ -230,8 +230,8 @@ module token_messenger_minter::token_minter {
     #[expected_failure(abort_code = 0x10001, location = Self)]
     fun test_mint_unsupported_mint_token(owner: &signer) {
         init_test_token_minter(owner);
-        token_controller::unlink_token_pair(owner, REMOTE_DOMAIN, REMOTE_STABLECOIN_ADDRESS);
-        token_controller::link_token_pair(
+        token_controller::test_unlink_token_pair(owner, REMOTE_DOMAIN, REMOTE_STABLECOIN_ADDRESS);
+        token_controller::test_link_token_pair(
             owner,
             @0xfac,
             REMOTE_DOMAIN,

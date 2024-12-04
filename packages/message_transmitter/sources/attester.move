@@ -41,7 +41,7 @@ module message_transmitter::attester {
     const ENOT_OWNER: u64 = 1;
     const EATTESTER_ALREADY_ENABLED: u64 = 2;
     const ETOO_FEW_ENABLED_ATTESTERS: u64 = 3;
-    const ELOW_SIGNATURE_THRESHOLD: u64 = 4;
+    const ENUM_ATTESTERS_SHOULD_BE_GREATER_THAN_SIGNATURE_THRESHOLD: u64 = 4;
     const ENOT_ATTESTER_MANAGER: u64 = 5;
     const EINVALID_ATTESTER_MANAGER: u64 = 6;
     const EINVALID_SIGNATURE_THRESHOLD: u64 = 7;
@@ -146,7 +146,7 @@ module message_transmitter::attester {
         assert!(vector::length<address>(&enabled_attesters) > 1, error::invalid_state(ETOO_FEW_ENABLED_ATTESTERS));
         assert!(
             vector::length<address>(&enabled_attesters) > state::get_signature_threshold(),
-            error::invalid_state(ELOW_SIGNATURE_THRESHOLD)
+            error::invalid_state(ENUM_ATTESTERS_SHOULD_BE_GREATER_THAN_SIGNATURE_THRESHOLD)
         );
         state::remove_attester(attester);
         event::emit(AttesterDisabled { attester });
@@ -186,21 +186,13 @@ module message_transmitter::attester {
         event::emit(SignatureThresholdUpdated { old_signature_threshold, new_signature_threshold });
     }
 
-    // -----------------------------
-    // ----- Friend Functions ------
-    // -----------------------------
-
-    public(friend) fun init_attester(caller: &signer, attester: address) {
-        enable_attester(caller, attester);
-    }
-
     /// Validates the attestation for the given message
     /// Aborts if:
     /// - length of attestation != ATTESTATION_SIGNATURE_LENGTH * signature_threshold
     /// - there are duplicate signers
     /// - signer is not one of the enabled attesters
     /// - addresses recovered are not in increasing order
-    public(friend) fun verify_attestation_signature(message: &vector<u8>, attestation: &vector<u8>) {
+    public fun verify_attestation_signature(message: &vector<u8>, attestation: &vector<u8>) {
         // Validate Attestation Size
         let signature_threshold =  state::get_signature_threshold();
         assert!(
@@ -241,6 +233,14 @@ module message_transmitter::attester {
     }
 
     // -----------------------------
+    // ----- Friend Functions ------
+    // -----------------------------
+
+    public(friend) fun init_attester(caller: &signer, attester: address) {
+        enable_attester(caller, attester);
+    }
+
+    // -----------------------------
     // ----- Private Functions -----
     // -----------------------------
 
@@ -253,7 +253,7 @@ module message_transmitter::attester {
         // Retrieve and validate signature id
         let recovery_id = *vector::borrow(signature, SIGNATURE_LENGTH - 1) - 27;
         assert!(
-            vector::contains(&vector[0, 1, 2, 3], &recovery_id),
+            vector::contains(&vector[0, 1], &recovery_id),
             error::invalid_argument(EINVALID_SIGNATURE)
         );
 
@@ -286,7 +286,7 @@ module message_transmitter::attester {
         let address_bytes = keccak256(*public_key);
 
         // EVM address is the made of last 20 bytes of the hash
-        let address = vector::slice(
+        let address_without_prefix = vector::slice(
             &address_bytes,
             vector::length(&address_bytes) - 20,
             vector::length(&address_bytes)
@@ -294,7 +294,7 @@ module message_transmitter::attester {
 
         // Add 0x0 prefix to make the address 32 bytes
         let address_with_prefix = x"000000000000000000000000";
-        vector::append(&mut address_with_prefix, address);
+        vector::append(&mut address_with_prefix, address_without_prefix);
         from_bcs::to_address(address_with_prefix)
     }
 

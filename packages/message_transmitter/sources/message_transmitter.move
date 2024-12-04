@@ -362,7 +362,7 @@ module message_transmitter::message_transmitter {
     // -----------------------------
 
     /// Generate signer from the `ExtendRef`
-    public(friend) fun get_signer(): signer acquires ObjectController {
+    fun get_signer(): signer acquires ObjectController {
         let object_address = state::get_object_address();
         let object_controller = borrow_global<ObjectController>(object_address);
         let object_signer = object::generate_signer_for_extending(
@@ -493,6 +493,11 @@ module message_transmitter::message_transmitter {
         );
         let attestation = x"78eede2dcaa5dbf6d1a9ce0831f699a6f8a6db9150cb8e26354432b2667f92406092b130cfc71f21ddb814a5ee1f1cee4f2d5cb43b712a7bb0b59fbbae018f2c1c";
         (message, attestation)
+    }
+
+    #[test_only]
+    public fun get_message_from_event(message_sent_event: &MessageSent): vector<u8> {
+        message_sent_event.message
     }
 
     // Message Transmitter Initialization Tests

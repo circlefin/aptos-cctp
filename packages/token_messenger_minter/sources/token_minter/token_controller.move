@@ -81,13 +81,18 @@ module token_messenger_minter::token_controller {
         get_local_token(remote_domain, remote_token)
     }
 
+    #[view]
+    public fun get_num_linked_tokens(): u64 {
+        state::get_num_linked_tokens()
+    }
+
     // -----------------------------
     // ----- Public Functions ------
     // -----------------------------
 
     /// Sets the token controller address. Emits `SetTokenController` event
     /// Aborts if:
-    /// - the caller is not the pauser
+    /// - the caller is not the owner
     public(friend) entry fun set_token_controller(caller: &signer, new_token_controller: address) {
         ownable::assert_is_owner(caller, state::get_object_address());
         state::set_token_controller(new_token_controller);
@@ -97,7 +102,7 @@ module token_messenger_minter::token_controller {
     /// Sets the maximum amount allowed to be burned per message/tx. Emits `SetBurnLimitPerMessage` event
     /// Aborts if:
     /// - the caller is not the token controller
-    public(friend) entry fun set_max_burn_amount_per_message(caller: &signer, token: address, burn_limit_per_message: u64) {
+    entry fun set_max_burn_amount_per_message(caller: &signer, token: address, burn_limit_per_message: u64) {
         assert_is_token_controller(caller);
         state::set_max_burn_limit_per_message_for_token(token, burn_limit_per_message);
         event::emit(SetBurnLimitPerMessage { token, burn_limit_per_message })
@@ -108,7 +113,7 @@ module token_messenger_minter::token_controller {
     /// Aborts if:
     /// - the caller is not the token controller
     /// - remote token is already linked to a local token
-    public(friend) entry fun link_token_pair(caller: &signer, local_token: address, remote_domain: u32, remote_token: address) {
+    entry fun link_token_pair(caller: &signer, local_token: address, remote_domain: u32, remote_token: address) {
         assert_is_token_controller(caller);
         assert!(
             !state::local_token_exists(remote_domain, remote_token),
@@ -122,7 +127,7 @@ module token_messenger_minter::token_controller {
     /// Aborts if:
     /// - the caller is not the token controller
     /// - no link exists for the given remote token and domain
-    public(friend) entry fun unlink_token_pair(caller: &signer, remote_domain: u32, remote_token: address) {
+    entry fun unlink_token_pair(caller: &signer, remote_domain: u32, remote_token: address) {
         assert_is_token_controller(caller);
         assert!(
             state::local_token_exists(remote_domain, remote_token),
@@ -137,8 +142,8 @@ module token_messenger_minter::token_controller {
     // -----------------------------
 
     public(friend) fun assert_amount_within_burn_limit(token: address, amount: u64) {
-        let (exists, limit) = state::get_max_burn_limit_per_message_for_token(token);
-        assert!(exists, error::invalid_argument(EBURN_TOKEN_NOT_SUPPORTED));
+        let (token_exists, limit) = state::get_max_burn_limit_per_message_for_token(token);
+        assert!(token_exists, error::invalid_argument(EBURN_TOKEN_NOT_SUPPORTED));
         assert!(amount <= limit, error::out_of_range(EAMOUNT_EXCEEDS_BURN_LIMIT))
     }
 
@@ -168,9 +173,24 @@ module token_messenger_minter::token_controller {
     #[test_only] const TOKEN_CONTROLLER: address = @0x8e72;
 
     #[test_only]
-    public(friend) fun init_test_token_controller(owner: &signer) {
+    public fun init_test_token_controller(owner: &signer) {
         state::init_test_state(owner);
         set_token_controller(owner, TOKEN_CONTROLLER);
+    }
+
+    #[test_only]
+    public fun test_link_token_pair(caller: &signer, local_token: address, remote_domain: u32, remote_token: address) {
+        link_token_pair(caller, local_token, remote_domain, remote_token);
+    }
+
+    #[test_only]
+    public fun test_unlink_token_pair(caller: &signer, remote_domain: u32, remote_token: address) {
+        unlink_token_pair(caller, remote_domain, remote_token);
+    }
+
+    #[test_only]
+    public fun test_set_max_burn_amount_per_message(caller: &signer, token: address, burn_limit_per_message: u64) {
+        set_max_burn_amount_per_message(caller, token, burn_limit_per_message)
     }
 
     // Test Set Token Controller
@@ -340,11 +360,13 @@ module token_messenger_minter::token_controller {
     fun test_view_functions(owner: &signer) {
         init_test_token_controller(owner);
         assert!(token_controller() == state::get_token_controller(), 0);
+        assert!(get_num_linked_tokens() == 0, 0);
 
         let remote_token = @0xfab;
         let remote_domain = 5;
         let local_token = @0xfaa;
         state::add_local_token_for_remote_token(remote_domain, remote_token, local_token);
         assert!(get_linked_token(remote_domain, remote_token) == local_token, 1);
+        assert!(get_num_linked_tokens() == 1, 0);
     }
 }

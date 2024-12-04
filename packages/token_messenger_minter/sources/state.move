@@ -130,6 +130,10 @@ module token_messenger_minter::state {
         smart_table::length(&borrow_global<State>(get_object_address()).remote_token_messengers)
     }
 
+    public(friend) fun get_num_linked_tokens(): u64 acquires State {
+        smart_table::length(&borrow_global<State>(get_object_address()).remote_tokens_to_local_tokens)
+    }
+
     public(friend) fun get_object_address(): address {
         object::create_object_address(&@token_messenger_minter, SEED_NAME)
     }
@@ -137,10 +141,6 @@ module token_messenger_minter::state {
     // -----------------------------
     // ---------- Setters ----------
     // -----------------------------
-
-    public(friend) fun set_message_body_version(message_body_version: u32) acquires State {
-        borrow_global_mut<State>(get_object_address()).message_body_version = message_body_version;
-    }
 
     public(friend) fun add_remote_token_messenger(domain: u32, token_messenger: address) acquires State {
         smart_table::add(
@@ -210,7 +210,7 @@ module token_messenger_minter::state {
     // -----------------------------
 
     #[test_only]
-    public(friend) fun init_test_state(caller: &signer) {
+    public fun init_test_state(caller: &signer) {
         let resource_account_address = account::create_resource_address(&@deployer, b"test_seed_tmm");
         let resource_account_signer = create_signer_for_test(resource_account_address);
         let constructor_ref = object::create_named_object(&resource_account_signer, SEED_NAME);
@@ -221,8 +221,13 @@ module token_messenger_minter::state {
     }
 
     #[test_only]
-    public(friend) fun set_paused(pauser: &signer) {
+    public fun set_paused(pauser: &signer) {
         pausable::test_pause(pauser, object::address_to_object<PauseState>(get_object_address()));
+    }
+
+    #[test_only]
+    public fun set_message_body_version(message_body_version: u32) acquires State {
+        borrow_global_mut<State>(get_object_address()).message_body_version = message_body_version;
     }
 
     // -----------------------------
@@ -342,17 +347,19 @@ module token_messenger_minter::state {
         assert!(hash == @0x8ae28a8d79ea231bafe63fb643c45dce060b33a1c2e122d161c4d8b75997436, 0);
     }
 
+    #[test(owner = @token_messenger_minter)]
+    fun test_get_num_linked_tokens(owner: &signer) acquires State {
+        init_test_state(owner);
+        smart_table::add(
+            &mut borrow_global_mut<State>(get_object_address()).remote_tokens_to_local_tokens, @0x100, @0x101
+        );
+        assert!(get_num_linked_tokens() == 1, 0)
+    }
+
 
     // -----------------------------
     // ---------- Setters ----------
     // -----------------------------
-
-    #[test(owner = @token_messenger_minter)]
-    fun test_set_message_body_version(owner: &signer) acquires State {
-        init_test_state(owner);
-        set_message_body_version(5);
-        assert!(get_message_body_version() == 5, 0);
-    }
 
     #[test(owner = @token_messenger_minter)]
     fun test_add_remote_token_messenger(owner: &signer) acquires State {
