@@ -1,16 +1,20 @@
-/*
- * Copyright (c) 2024, Circle Internet Group, Inc.
- * All rights reserved.
+/**
+ * Copyright (c) 2024, Circle Internet Group, Inc. All rights reserved.
  *
- * Circle Internet Group, Inc. CONFIDENTIAL
+ * SPDX-License-Identifier: Apache-2.0
  *
- * This file includes unpublished proprietary source code of Circle Internet
- * Group, Inc. The copyright notice above does not evidence any actual or
- * intended publication of such source code. Disclosure of this source code
- * or any related proprietary information is strictly prohibited without
- * the express written permission of Circle Internet Group, Inc.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
-
 import { AptosContractClient } from "./aptosContractClient";
 import {
   Account,
@@ -141,16 +145,16 @@ export class TokenMessengerMinterClient extends AptosContractClient {
 
   getMessageBodyVersion = async (): Promise<MoveUint32Type> => {
     const messageBodyVersion = await this.executeMoveViewFunction(
-        MoveModule.TokenMessenger,
-        MoveFunction.MessageBodyVersion
+      MoveModule.TokenMessenger,
+      MoveFunction.MessageBodyVersion
     );
     return messageBodyVersion[0] as MoveUint32Type;
   };
 
   getNumRemoteTokenMessenger = async (): Promise<MoveUint64Type> => {
     const numRemoteTokenMessengers = await this.executeMoveViewFunction(
-        MoveModule.TokenMessenger,
-        MoveFunction.NumRemoteTokenMessengers
+      MoveModule.TokenMessenger,
+      MoveFunction.NumRemoteTokenMessengers
     );
     return numRemoteTokenMessengers[0] as MoveUint64Type;
   };
@@ -164,11 +168,10 @@ export class TokenMessengerMinterClient extends AptosContractClient {
   };
 
   getLinkedToken = async (remoteDomain: U32, remoteToken: AccountAddress): Promise<AccountAddress> => {
-    const localToken = await this.executeMoveViewFunction(
-        MoveModule.TokenController,
-        MoveFunction.GetLinkedToken,
-        [remoteDomain, remoteToken]
-    );
+    const localToken = await this.executeMoveViewFunction(MoveModule.TokenController, MoveFunction.GetLinkedToken, [
+      remoteDomain,
+      remoteToken,
+    ]);
     return AccountAddress.fromString(localToken[0] as string);
   };
 
