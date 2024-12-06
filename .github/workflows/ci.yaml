@@ -22,7 +22,7 @@ on:
     branches: [master]
 jobs:
   run-message-transmitter-tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
@@ -41,7 +41,7 @@ jobs:
           make verify-message-transmitter-coverage
 
   run-token-messenger-tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
@@ -60,7 +60,7 @@ jobs:
           make verify-token-messenger-minter-coverage
 
   run-e2e-tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
@@ -80,7 +80,7 @@ jobs:
           yarn test:e2e
 
   spell-checker:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
