@@ -113,7 +113,7 @@ module token_messenger_minter::token_messenger {
     // ----- Public Functions ------
     // -----------------------------
 
-    /// Burns token from sender address, to be minted on destination domain. Emits `DepositForBurn` event.
+    /// Burns the passed in token asset, to be minted on destination domain. Emits `DepositForBurn` event.
     /// Aborts if:
     /// - amount is zero
     /// - destination domain has no TokenMessenger registered
@@ -135,7 +135,7 @@ module token_messenger_minter::token_messenger {
         )
     }
 
-    /// Burns token from sender address, to be minted on destination domain. The mint on the destination domain must
+    /// Burns the passed in token asset, to be minted on destination domain. The mint on the destination domain must
     /// be called by `destinationCaller`. Emits `DepositForBurn` event.
     /// Aborts if:
     /// - amount is zero

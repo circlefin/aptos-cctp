@@ -29,7 +29,6 @@ module token_messenger_minter::token_controller {
     // Friend Modules
     friend token_messenger_minter::token_minter;
     friend token_messenger_minter::token_messenger_minter;
-    friend token_messenger_minter::token_messenger;
 
     // Errors
     const ENOT_TOKEN_CONTROLLER: u64 = 1;
