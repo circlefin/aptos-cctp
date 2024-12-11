@@ -28,5 +28,5 @@
   "ignoreRegExpList": [
     "error_codes"
   ],
-  "ignorePaths": ["aptos-core", "stablecoin-aptos", "evm-cctp-contracts"]
+  "ignorePaths": ["aptos-core", "stablecoin-aptos", "evm-cctp-contracts", "typescript/example/abi"]
 }
