@@ -16,7 +16,9 @@
     "calculate-deployment-addresses": "yarn ts-node typescript/aptos/deploy/index.ts calculate-deployment-addresses",
     "deploy": "yarn ts-node typescript/aptos/deploy/index.ts deploy",
     "upgrade-pkg": "yarn ts-node typescript/aptos/deploy/index.ts upgrade",
-    "verify-pkg": "yarn ts-node typescript/aptos/deploy/index.ts verify-pkg"
+    "verify-pkg": "yarn ts-node typescript/aptos/deploy/index.ts verify-pkg",
+    "deposit-for-burn-example": "node --env-file=typescript/.env -r ts-node/register typescript/example/depositForBurn.ts",
+    "receive-message-example": "node --env-file=typescript/.env -r ts-node/register typescript/example/receiveMessage.ts"
   },
   "dependencies": {
     "@aptos-labs/ts-sdk": "^1.28.0",

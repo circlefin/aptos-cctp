@@ -41,6 +41,18 @@ yarn install
 yarn test:e2e
 ```
 
+### Running Example Scripts on Testnet
+1. Rename .env.example to .env and fill in the required environment variables.
+2. Run the example script for Base/EVM -> Aptos
+```sh
+yarn receive-message-example
+```
+3. Run the example script for Aptos -> Base/EVM
+```sh
+yarn deposit-for-burn-example
+```
+
+
 ## Deployment
 
 1. Create a deployer keypair and fund it with APT
