@@ -23,6 +23,9 @@ on:
 jobs:
   run-message-transmitter-tests:
     runs-on: ubuntu-22.04
+    permissions:
+      id-token: write
+
     steps:
       - name: Harden the runner
         uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
@@ -48,6 +51,9 @@ jobs:
 
   run-token-messenger-tests:
     runs-on: ubuntu-22.04
+    permissions:
+      id-token: write
+
     steps:
       - name: Harden the runner
         uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
@@ -73,6 +79,9 @@ jobs:
 
   run-e2e-tests:
     runs-on: ubuntu-22.04
+    permissions:
+      id-token: write
+
     steps:
       - name: Harden the runner
         uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
@@ -99,6 +108,9 @@ jobs:
 
   spell-checker:
     runs-on: ubuntu-22.04
+    permissions:
+      id-token: write
+
     steps:
       - name: Harden the runner
         uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
