@@ -19,7 +19,7 @@ deployer = "c06c5aa31d28c27be8345770a83b48314b829039ec5a33b79265216c13c66071"
 
 [dependencies.AptosFramework]
 git = "https://github.com/aptos-labs/aptos-core.git"
-rev = "mainnet"
+rev = "1381c93fd5a656f16fb326d4ffe371947554a330"
 subdir = "aptos-move/framework/aptos-framework"
 
 [dependencies.AptosExtensions]
