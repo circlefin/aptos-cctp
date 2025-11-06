@@ -34,12 +34,12 @@ jobs:
           policy: global-allowed-endpoints-policy
 
       - name: Check out repository code
-        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           submodules: "true"
 
       - name: Install Node
-        uses: actions/setup-node@7c12f8017d5436eb855f1ed4399f037a36fbd9e8 # v2.5.2
+        uses: actions/setup-node@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           node-version: "22"
 
@@ -62,12 +62,12 @@ jobs:
           policy: global-allowed-endpoints-policy
 
       - name: Check out repository code
-        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           submodules: "true"
 
       - name: Install Node
-        uses: actions/setup-node@7c12f8017d5436eb855f1ed4399f037a36fbd9e8 # v2.5.2
+        uses: actions/setup-node@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           node-version: "20.14.0"
 
@@ -90,12 +90,12 @@ jobs:
           policy: global-allowed-endpoints-policy
 
       - name: Check out repository code
-        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           submodules: "true"
 
       - name: Install Node
-        uses: actions/setup-node@7c12f8017d5436eb855f1ed4399f037a36fbd9e8 # v2.5.2
+        uses: actions/setup-node@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           node-version: "20.14.0"
 
@@ -119,10 +119,10 @@ jobs:
           policy: global-allowed-endpoints-policy
 
       - name: Check out repository code
-        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
       - name: Install Node
-        uses: actions/setup-node@7c12f8017d5436eb855f1ed4399f037a36fbd9e8 # v2.5.2
+        uses: actions/setup-node@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           node-version: "20.14.0"
 
