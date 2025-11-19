@@ -16,18 +16,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+source versions.sh
 echo "Deploying evm-cctp-contracts contracts"
 
 FOUNDRY_PATH=~/.foundry/bin
+FOUNDRY_SHORT_VERSION=$(echo ${FOUNDRY_VERSION} | cut -d '-' -f2 | cut -c1-7)
 
 # Check if foundry is installed
-if ! "$FOUNDRY_PATH/forge" -V; then
+if [ ! -x "$FOUNDRY_PATH/forge" ] || ! "$FOUNDRY_PATH/forge" --version | grep ${FOUNDRY_SHORT_VERSION} ; then
  curl -L https://foundry.paradigm.xyz | bash
- # 07-14-2023 - The version following this version breaks our build, so setting to this version for now.
- if ! "$FOUNDRY_PATH/foundryup" -V; then
+
+ if [ ! -x "$FOUNDRY_PATH/foundryup" ]; then
   FOUNDRY_PATH=~/.config/.foundry/bin
  fi
- "$FOUNDRY_PATH/foundryup" --version nightly-d369d2486f85576eec4ca41d277391dfdae21ba7
+ "$FOUNDRY_PATH/foundryup" --install ${FOUNDRY_VERSION}
 fi
 
 cd evm-cctp-contracts
@@ -39,10 +41,10 @@ git submodule update --init --recursive
 yarn install
 
 # Build the anvil image
-docker build --no-cache -f Dockerfile -t foundry .
+docker build --no-cache --platform linux/amd64 --file Dockerfile --tag foundry --build-arg FOUNDRY_VERSION=${FOUNDRY_VERSION} .
 
 # Create the anvil container
-docker stop anvil-eth && docker rm anvil-eth || true
+docker rm -f anvil-eth || true
 docker run -d -p 8500:8545 --name anvil-eth --rm foundry "anvil --host 0.0.0.0 -a 13 --code-size-limit 250000"
 
 # Define the contract parameters
@@ -83,8 +85,7 @@ export DOMAIN=0
 "$FOUNDRY_PATH/forge" script ../scripts/evm/cctp_deploy.s.sol:DeployScript --rpc-url $RPC_URL_ETH --sender $SENDER --broadcast
 mkdir -p cctp-interfaces
 cp -R ./out/* ./cctp-interfaces
-"$FOUNDRY_PATH/forge" script ../scripts/evm/usdc_deploy.s.sol:USDCDeployScript --rpc-url $RPC_URL_ETH --sender $SENDER --broadcast --force --use 0.6.12
+"$FOUNDRY_PATH/forge" script ../scripts/evm/usdc_deploy.s.sol:USDCDeployScript --rpc-url $RPC_URL_ETH --sender $SENDER --broadcast
 mkdir -p usdc-interfaces
 cp -R ./out/* ./usdc-interfaces
-
 cd ..
