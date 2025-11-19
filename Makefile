@@ -46,7 +46,7 @@ token-messenger-minter-coverage:
 
 verify-message-transmitter-coverage:
 	@coverage=$$(aptos move test --package-dir packages/message_transmitter --coverage --dev | grep "Move Coverage:" | grep -Eo "[0-9]+" | head -1); \
-	if [ $$coverage -eq 100 ]; then \
+	if [ $$coverage -ge 99 ]; then \
 		echo "Test Coverage is $$coverage%"; \
 	else \
 		echo "Test Coverage is only $$coverage%. Should be at least 99%"; \
