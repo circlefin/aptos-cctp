@@ -18,16 +18,12 @@
 
 echo "Deploying evm-cctp-contracts contracts"
 
-FOUNDRY_PATH=~/.foundry/bin
+FOUNDRY_PATH=~/.config/.foundry/bin
 
-# Check if foundry is installed
 if ! "$FOUNDRY_PATH/forge" -V; then
  curl -L https://foundry.paradigm.xyz | bash
  # 07-14-2023 - The version following this version breaks our build, so setting to this version for now.
- if ! "$FOUNDRY_PATH/foundryup" -V; then
-  FOUNDRY_PATH=~/.config/.foundry/bin
- fi
- "$FOUNDRY_PATH/foundryup" --version nightly-d369d2486f85576eec4ca41d277391dfdae21ba7
+ "$FOUNDRY_PATH/foundryup" --install nightly-d369d2486f85576eec4ca41d277391dfdae21ba7
 fi
 
 cd evm-cctp-contracts
