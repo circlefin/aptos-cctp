@@ -23,25 +23,16 @@ on:
 jobs:
   run-message-transmitter-tests:
     runs-on: ubuntu-22.04
-    permissions:
-      id-token: write
-
     steps:
-      - name: Harden the runner
-        uses: step-security/harden-runner@95d9a5deda9de15063e7595e9719c11c38c90ae2 # v2.13.2
-        with:
-          egress-policy: block
-          policy: global-allowed-endpoints-policy
-
       - name: Check out repository code
         uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
         with:
           submodules: "true"
 
       - name: Install Node
-        uses: actions/setup-node@7c12f8017d5436eb855f1ed4399f037a36fbd9e8 # v2.5.2
+        uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
         with:
-          node-version: "20.14.0"
+          node-version: "22"
 
       - name: Compile and Run Tests
         run: |
@@ -51,25 +42,16 @@ jobs:
 
   run-token-messenger-tests:
     runs-on: ubuntu-22.04
-    permissions:
-      id-token: write
-
     steps:
-      - name: Harden the runner
-        uses: step-security/harden-runner@95d9a5deda9de15063e7595e9719c11c38c90ae2 # v2.13.2
-        with:
-          egress-policy: block
-          policy: global-allowed-endpoints-policy
-
       - name: Check out repository code
         uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
         with:
           submodules: "true"
 
       - name: Install Node
-        uses: actions/setup-node@7c12f8017d5436eb855f1ed4399f037a36fbd9e8 # v2.5.2
+        uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
         with:
-          node-version: "20.14.0"
+          node-version: "22"
 
       - name: Compile and Run Tests
         run: |
@@ -79,25 +61,16 @@ jobs:
 
   run-e2e-tests:
     runs-on: ubuntu-22.04
-    permissions:
-      id-token: write
-
     steps:
-      - name: Harden the runner
-        uses: step-security/harden-runner@95d9a5deda9de15063e7595e9719c11c38c90ae2 # v2.13.2
-        with:
-          egress-policy: block
-          policy: global-allowed-endpoints-policy
-
       - name: Check out repository code
         uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
         with:
           submodules: "true"
 
       - name: Install Node
-        uses: actions/setup-node@7c12f8017d5436eb855f1ed4399f037a36fbd9e8 # v2.5.2
+        uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
         with:
-          node-version: "20.14.0"
+          node-version: "22"
 
       - name: Compile and Run Tests
         run: |
@@ -108,23 +81,14 @@ jobs:
 
   spell-checker:
     runs-on: ubuntu-22.04
-    permissions:
-      id-token: write
-
     steps:
-      - name: Harden the runner
-        uses: step-security/harden-runner@95d9a5deda9de15063e7595e9719c11c38c90ae2 # v2.13.2
-        with:
-          egress-policy: block
-          policy: global-allowed-endpoints-policy
-
       - name: Check out repository code
         uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
 
       - name: Install Node
-        uses: actions/setup-node@7c12f8017d5436eb855f1ed4399f037a36fbd9e8 # v2.5.2
+        uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
         with:
-          node-version: "20.14.0"
+          node-version: "22"
 
       - name: Compile and Run Tests
         run: |
