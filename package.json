@@ -21,7 +21,7 @@
     "receive-message-example": "node --env-file=typescript/.env -r ts-node/register typescript/example/receiveMessage.ts"
   },
   "dependencies": {
-    "@aptos-labs/ts-sdk": "^5.2.0",
+    "@aptos-labs/ts-sdk": "^1.28.0",
     "@jest/globals": "^29.3.1",
     "commander": "^12.1.0",
     "dotenv": "^16.4.5",
@@ -50,5 +50,9 @@
   "engines": {
     "node": "22",
     "yarn": "1.22.22"
+  },
+  "resolutions": {
+    "axios": "1.12.2",
+    "form-data": "4.0.4"
   }
 }
