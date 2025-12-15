@@ -50,5 +50,9 @@
   "engines": {
     "node": "22",
     "yarn": "1.22.22"
+  },
+  "resolutions": {
+    "axios": "1.12.2",
+    "form-data": "4.0.4"
   }
 }
