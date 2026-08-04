@@ -75,8 +75,13 @@ export async function generateFundedAccountFromPrivateKey(
  * Finds a specific event from the transaction output
  */
 export function getEventByType(txOutput: UserTransactionResponse, eventType: string): Event {
-  const event = txOutput.events.find((e: any) => e.type === eventType);
+  const normalizedType = normalizeEventType(eventType);
+  const event = txOutput.events.find((e: any) => normalizeEventType(e.type) === normalizedType);
   return event;
+}
+
+function normalizeEventType(eventType: string): string {
+  return eventType.replace(/0x0*([0-9a-fA-F]+)/, (_, hex) => `0x${hex.toLowerCase().padStart(64, "0")}`);
 }
 
 /**
@@ -106,6 +111,9 @@ export async function executeTransaction({
   const transaction = await aptos.transaction.build.simple({
     sender: sender.accountAddress,
     data,
+    options: {
+      maxGasAmount: 2_000_000,
+    }
   });
   const response = await aptos.signAndSubmitTransaction({
     signer: sender,

@@ -47,6 +47,8 @@ export enum MoveFunction {
   MessageBodyVersion = "message_body_version",
   NumRemoteTokenMessengers = "num_remote_token_messengers",
   GetLinkedToken = "get_linked_token",
+  GetNumLinkedTokens = "get_num_linked_tokens",
+  MaxBurnAmountPerMessage = "max_burn_amount_per_message",
 
   // Ownable
   TransferOwnership = "transfer_ownership",
@@ -71,4 +73,37 @@ export enum MoveFunction {
   AcceptAdmin = "accept_admin",
   Admin = "admin",
   PendingAdmin = "pending_admin",
+
+  // Upgradable
+  UpgradePackage = "upgrade_package",
+
+  // Rescuable
+  Rescuer = "rescuer",
+  UpdateRescuer = "update_rescuer",
+  RescueFungibleAsset = "rescue_fungible_asset",
+
+  // HandlerRegistry (V2)
+  RegisterHandler = "register_handler",
+  DeregisterHandler = "deregister_handler",
+  IsHandlerRegistered = "is_handler_registered",
+  GetHandler = "get_handler",
+
+  // FeeController (V2)
+  SetMinFee = "set_min_fee",
+  GetMinFee = "get_min_fee",
+  GetFeeRecipient = "get_fee_recipient",
+  GetMinFeeController = "get_min_fee_controller",
+  SetFeeRecipient = "set_fee_recipient",
+  SetMinFeeController = "set_min_fee_controller",
+
+  // Denylistable (V2)
+  IsDenylisted = "is_denylisted",
+  GetDenylister = "denylister",
+  Denylist = "denylist",
+  Undenylist = "undenylist",
+  UpdateDenylister = "update_denylister",
+
+  // StablecoinHandler
+  HandlerAddress = "handler_address",
+  SupportedToken = "supported_token",
 }

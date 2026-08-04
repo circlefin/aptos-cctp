@@ -21,7 +21,7 @@ on:
   push:
     branches: [master]
 jobs:
-  run-message-transmitter-tests:
+  run-v1-tests:
     runs-on: ubuntu-22.04
     steps:
       - name: Check out repository code
@@ -37,10 +37,9 @@ jobs:
       - name: Compile and Run Tests
         run: |
           make setup
-          make message-transmitter-coverage
-          make verify-message-transmitter-coverage
+          make coverage-verify-v1
 
-  run-token-messenger-tests:
+  run-v2-tests:
     runs-on: ubuntu-22.04
     steps:
       - name: Check out repository code
@@ -55,11 +54,10 @@ jobs:
 
       - name: Compile and Run Tests
         run: |
-          make setup
-          make token-messenger-minter-coverage
-          make verify-token-messenger-minter-coverage
+          make setup-v2
+          make coverage-verify-v2
 
-  run-e2e-tests:
+  run-e2e-v1-tests:
     runs-on: ubuntu-22.04
     steps:
       - name: Check out repository code
@@ -76,8 +74,28 @@ jobs:
         run: |
           ./docker-start-containers.sh
           sleep 30
-          make compile-scripts
+          make compile-scripts-v1
           yarn test:e2e
+
+  run-e2e-v2-tests:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          submodules: "true"
+
+      - name: Install Node
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: "22"
+
+      - name: Compile and Run Tests
+        run: |
+          ./docker-start-containers.sh v2
+          sleep 60
+          make compile-scripts-v2
+          yarn test:e2e-v2
 
   spell-checker:
     runs-on: ubuntu-22.04
@@ -97,18 +115,20 @@ jobs:
 
   scan:
     needs:
-      - run-message-transmitter-tests
-      - run-token-messenger-tests
-      - run-e2e-tests
+      - run-v1-tests
+      - run-v2-tests
+      - run-e2e-v1-tests
+      - run-e2e-v2-tests
       - spell-checker
     if: github.event_name == 'pull_request'
     uses: circlefin/circle-public-github-workflows/.github/workflows/pr-scan.yaml@v1
 
   release-sbom:
     needs:
-      - run-message-transmitter-tests
-      - run-token-messenger-tests
-      - run-e2e-tests
+      - run-v1-tests
+      - run-v2-tests
+      - run-e2e-v1-tests
+      - run-e2e-v2-tests
       - spell-checker
     if: github.event_name == 'push'
     uses: circlefin/circle-public-github-workflows/.github/workflows/attach-release-assets.yaml@v1

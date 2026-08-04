@@ -1,0 +1,26 @@
+diff --git a/packages/aptos_extensions/Move.toml b/packages/aptos_extensions/Move.toml
+index 50c28e3..0b0e374 100644
+--- a/packages/aptos_extensions/Move.toml
++++ b/packages/aptos_extensions/Move.toml
+@@ -13,7 +13,7 @@ deployer = "0xaa03675e2e13043f3d591804b0d8a8ffb775d14b11ca0831866ecdf48df26713"
+ 
+ [dependencies.AptosFramework]
+ git = "https://github.com/aptos-labs/aptos-core.git"
+-rev = "mainnet"
++rev = "e2683170c2d7121ebe6174793dfc2f850992ca7b"
+ subdir = "aptos-move/framework/aptos-framework"
+ 
+ [dev-dependencies]
+diff --git a/packages/stablecoin/Move.toml b/packages/stablecoin/Move.toml
+index ca0bd82..fbc27f1 100644
+--- a/packages/stablecoin/Move.toml
++++ b/packages/stablecoin/Move.toml
+@@ -5,7 +5,7 @@ upgrade_policy = "compatible"
+ 
+ [dependencies.AptosFramework]
+ git = "https://github.com/aptos-labs/aptos-core.git"
+-rev = "mainnet"
++rev = "e2683170c2d7121ebe6174793dfc2f850992ca7b"
+ subdir = "aptos-move/framework/aptos-framework"
+ 
+ [dependencies.AptosExtensions]

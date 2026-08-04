@@ -16,7 +16,19 @@
     "pkill",
     "dispatchable",
     "fullnode",
-    "circlefin"
+    "circlefin",
+    "pipefail",
+    "denylistable",
+    "denylister",
+    "undenylist",
+    "undenylisted",
+    "rescuable",
+    "ownerable",
+    "pkgs",
+    "permissionless",
+    "stablecoins",
+    "starknet",
+    "compl"
   ],
   "useGitignore": true,
   "patterns": [
@@ -28,5 +40,5 @@
   "ignoreRegExpList": [
     "error_codes"
   ],
-  "ignorePaths": ["aptos-core", "stablecoin-aptos", "evm-cctp-contracts", "typescript/example/abi"]
+  "ignorePaths": ["aptos-core", "stablecoin-aptos", "evm-cctp-contracts", "typescript/example/abi", "typescript/example/v2/abi", "patches"]
 }

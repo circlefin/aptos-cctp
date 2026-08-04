@@ -19,16 +19,22 @@
 import { program } from "commander";
 
 import calculateDeploymentAddresses from "./calculateDeploymentAddresses";
+import calculateV2DeploymentAddresses from "./calculateV2DeploymentAddresses";
 import deployAllPackages from "./deployAllPackages";
+import deployAllV2Packages from "./deployAllV2Packages";
 import upgradePackage from "./upgradePackage";
+import verifyAllV2Packages from "./verifyAllV2Packages";
 import verifyPackage from "./verifyPackage";
 
 program
   .name("scripts")
   .description("Scripts related to Aptos development")
   .addCommand(calculateDeploymentAddresses)
+  .addCommand(calculateV2DeploymentAddresses)
   .addCommand(deployAllPackages)
+  .addCommand(deployAllV2Packages)
   .addCommand(upgradePackage)
+  .addCommand(verifyAllV2Packages)
   .addCommand(verifyPackage);
 
 if (process.env.NODE_ENV !== "TESTING") {

@@ -17,18 +17,25 @@
  */
 
 export enum CctpFunctionScript {
-  // MessageTransmitter
+  // MessageTransmitter (V1)
   InitMessageTransmitter = "init_message_transmitter",
   ReceiveMessage = "receive_message",
   ReplaceMessage = "replace_message",
   SendMessage = "send_message",
   SendMessageWithCaller = "send_message_with_caller",
 
-  // TokenMessengerMinter
+  // TokenMessengerMinter (V1)
   InitTokenMessengerMinter = "init_token_messenger_minter",
   DepositForBurn = "deposit_for_burn",
   DepositForBurnWithCaller = "deposit_for_burn_with_caller",
   HandleReceiveMessage = "handle_receive_message",
   ReplaceDepositForBurn = "replace_deposit_for_burn",
   Mint = "mint",
+
+  // StablecoinHandler (V2)
+  DepositForBurnV2 = "deposit_for_burn",
+  DepositForBurnWithHookV2 = "deposit_for_burn_with_hook",
+  ReceiveMessageV2 = "receive_message",
+  MintV2 = "mint",
+  SendMessageV2 = "send_message",
 }

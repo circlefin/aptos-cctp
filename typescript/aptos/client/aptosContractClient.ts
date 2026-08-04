@@ -125,6 +125,9 @@ export abstract class AptosContractClient {
       case PackageName.TokenMessengerMinter:
         builtPackage = "TokenMessengerMinter";
         break;
+      case PackageName.StablecoinHandler:
+        builtPackage = "StablecoinHandler";
+        break;
       default:
         console.log("Unknown package has been defined. Please investigate.", this.packageName);
         break;
