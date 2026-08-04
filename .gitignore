@@ -5,3 +5,6 @@ dist
 node_modules
 
 logs
+
+.yarn
+.coverage_map.mvcov

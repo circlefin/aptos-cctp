@@ -19,8 +19,17 @@
 
 DOCROOT="$( cd "$( dirname "$0" )" && pwd )"
 
-make setup
+VERSION="${1:-v1}"
+
+if [ "$VERSION" = "v2" ]; then
+  make setup-v2
+else
+  make setup
+fi
 
 source "${DOCROOT}/scripts/aptos/aptos-local-network.sh"
 start_aptos_localnet
-source setup-evm-contracts.sh
+
+if [ "$VERSION" != "v2" ]; then
+  source setup-evm-contracts.sh
+fi

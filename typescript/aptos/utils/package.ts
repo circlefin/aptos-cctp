@@ -18,7 +18,11 @@
 
 export enum PackageName {
   MessageTransmitter = "message_transmitter",
+  MessageTransmitterV2 = "message_transmitter_v2",
   TokenMessengerMinter = "token_messenger_minter",
+  TokenMessengerMinterV2 = "token_messenger_minter_v2",
   AptosExtensions = "aptos_extensions",
+  CctpExtensions = "cctp_extensions",
   Stablecoin = "stablecoin",
+  StablecoinHandler = "stablecoin_handler",
 }

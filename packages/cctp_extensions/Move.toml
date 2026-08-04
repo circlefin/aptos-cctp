@@ -1,0 +1,25 @@
+[package]
+name = "CctpExtensions"
+version = "1.0.0"
+upgrade_policy = "compatible"
+
+[addresses]
+cctp_extensions = "_"
+aptos_extensions = "_"
+deployer = "_"
+
+[dev-addresses]
+cctp_extensions = "0x3fb43a8e43df7c06835ad18bd218d97e1dbe16a2b9980aa8045f55e52c18d86a"
+aptos_extensions = "5ba1674a3ffa843ed88aa4a0a051b9a52f76459a8853e5cd62b22bcc488d2765"
+deployer = "c06c5aa31d28c27be8345770a83b48314b829039ec5a33b79265216c13c66071"
+
+
+[dependencies.AptosFramework]
+git = "https://github.com/aptos-labs/aptos-core.git"
+rev = "e2683170c2d7121ebe6174793dfc2f850992ca7b"
+subdir = "aptos-move/framework/aptos-framework"
+
+[dependencies.AptosExtensions]
+local = "../../stablecoin-aptos/packages/aptos_extensions"
+
+[dev-dependencies]

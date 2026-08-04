@@ -24,9 +24,26 @@ export enum MoveModule {
   TokenController = "token_controller",
   Stablecoin = "stablecoin",
   Treasury = "treasury",
+  Initializer = "initializer",
 
   // Aptos Extensions
   Pausable = "pausable",
   Ownable = "ownable",
   Manageable = "manageable",
+  Upgradable = "upgradable",
+
+  // Cctp Extensions
+  Rescuable = "rescuable",
+
+  // V2 Handler Registry
+  HandlerRegistry = "handler_registry",
+
+  // V2 Fee Controller
+  FeeController = "fee_controller",
+
+  // V2 Denylistable
+  Denylistable = "denylistable",
+
+  // Stablecoin Handler
+  Handler = "handler",
 }

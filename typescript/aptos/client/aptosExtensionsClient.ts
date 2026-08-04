@@ -17,10 +17,11 @@
  */
 
 import { AptosContractClient } from "./aptosContractClient";
-import { Account, AccountAddress, Aptos, CommittedTransactionResponse, Ed25519Account } from "@aptos-labs/ts-sdk";
+import { Account, AccountAddress, Aptos, CommittedTransactionResponse, Ed25519Account, UserTransactionResponse } from "@aptos-labs/ts-sdk";
 import { PackageName } from "../utils/package";
 import { MoveModule } from "../utils/moveModule";
 import { MoveFunction } from "../utils/moveFunction";
+import { getEventByType } from "../utils/helper";
 
 export class AptosExtensionsClient extends AptosContractClient {
   constructor(aptos: Aptos, packageDeployer: Ed25519Account) {
@@ -140,6 +141,20 @@ export class AptosExtensionsClient extends AptosContractClient {
     return (pendingAdmin[0] as any).vec.length == 0 ? "" : AccountAddress.fromString((pendingAdmin[0] as any).vec[0]);
   };
 
+  upgradePackage = async (
+    signer: Account,
+    resourceAccount: string,
+    metadataBytes: string,
+    bytecode: string[]
+  ): Promise<CommittedTransactionResponse> => {
+    return await this.executeMoveFunction(
+      MoveModule.Upgradable,
+      MoveFunction.UpgradePackage,
+      [resourceAccount, metadataBytes, bytecode],
+      signer
+    );
+  };
+
   publishPackage = async (filePath: string): Promise<string> => {
     return await this.buildAndPublishPackage(
       `${filePath}/${this.packageName}/`,
@@ -149,5 +164,34 @@ export class AptosExtensionsClient extends AptosContractClient {
       new Uint8Array(Buffer.from("aptos_extensions")),
       "sparse"
     );
+  };
+
+  // Event verification helpers
+  getPauseEvent = (txResponse: CommittedTransactionResponse) => {
+    return getEventByType(txResponse as UserTransactionResponse, `${this.packageId}::pausable::Pause`);
+  };
+
+  getUnpauseEvent = (txResponse: CommittedTransactionResponse) => {
+    return getEventByType(txResponse as UserTransactionResponse, `${this.packageId}::pausable::Unpause`);
+  };
+
+  getPauserChangedEvent = (txResponse: CommittedTransactionResponse) => {
+    return getEventByType(txResponse as UserTransactionResponse, `${this.packageId}::pausable::PauserChanged`);
+  };
+
+  getOwnershipTransferStartedEvent = (txResponse: CommittedTransactionResponse) => {
+    return getEventByType(txResponse as UserTransactionResponse, `${this.packageId}::ownable::OwnershipTransferStarted`);
+  };
+
+  getOwnershipTransferredEvent = (txResponse: CommittedTransactionResponse) => {
+    return getEventByType(txResponse as UserTransactionResponse, `${this.packageId}::ownable::OwnershipTransferred`);
+  };
+
+  getAdminChangeStartedEvent = (txResponse: CommittedTransactionResponse) => {
+    return getEventByType(txResponse as UserTransactionResponse, `${this.packageId}::manageable::AdminChangeStarted`);
+  };
+
+  getAdminChangedEvent = (txResponse: CommittedTransactionResponse) => {
+    return getEventByType(txResponse as UserTransactionResponse, `${this.packageId}::manageable::AdminChanged`);
   };
 }

@@ -21,7 +21,7 @@
 module.exports = {
   preset: "ts-jest",
   testEnvironment: "node",
-  testMatch: ["<rootDir>/e2e/test/*.test.[jt]s?(x)"],
+  testMatch: ["<rootDir>/e2e/**/*.test.[jt]s?(x)"],
   testPathIgnorePatterns: ["/node_modules/"],
   maxWorkers: 1,
   verbose: true,
