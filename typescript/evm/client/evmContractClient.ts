@@ -21,30 +21,41 @@ import { expect } from "@jest/globals";
 import * as ethutil from "@ethereumjs/util";
 import waitForExpect from "wait-for-expect";
 import { Contract, EventLog, TransactionReceipt, Web3 } from "web3";
+import type { ContractAbi } from "web3-types";
 
 export interface EvmContractDefinition {
-  messageTransmitterContract: Contract<any>;
+  messageTransmitterContract: Contract<ContractAbi>;
   messageTransmitterContractAddress: string;
-  tokenMessengerContract: Contract<any>;
+  tokenMessengerContract: Contract<ContractAbi>;
   tokenMessengerContractAddress: string;
-  tokenMinterContract: Contract<any>;
+  tokenMinterContract: Contract<ContractAbi>;
   tokenMinterContractAddress: string;
-  usdcContract: Contract<any>;
+  usdcContract: Contract<ContractAbi>;
   usdcContractAddress: string;
   web3: Web3;
+}
+
+type PastEventsReader = (
+  eventName: string,
+  options: { fromBlock: number | bigint | string; toBlock: number | bigint | string },
+) => Promise<readonly (string | EventLog)[]>;
+
+function readPastEvents(contract: Contract<ContractAbi>): PastEventsReader {
+  return contract.getPastEvents.bind(contract) as unknown as PastEventsReader;
 }
 
 export const attestedMessage = async (
   contractDefinition: EvmContractDefinition,
   txReceipt: TransactionReceipt
 ): Promise<{ attestation: string; txHash: string; messageBytes: Buffer; blockHeight: number }> => {
-  // Create an attestation using the initialized Anvil keypair
-  let logs: any = [];
+  // Read attestation events emitted by the local EVM deployment.
+  let logs: EventLog[] = [];
   await waitForExpect(async () => {
-    logs = await contractDefinition.messageTransmitterContract.getPastEvents("MessageSent", {
+    const rawLogs = await readPastEvents(contractDefinition.messageTransmitterContract)("MessageSent", {
       fromBlock: txReceipt.blockNumber,
       toBlock: txReceipt.blockNumber,
     });
+    logs = rawLogs.filter((log): log is EventLog => typeof log !== "string");
     expect(logs.length).toBeGreaterThan(0);
   }, 90_000);
 
@@ -59,8 +70,11 @@ export const attestedMessage = async (
 };
 
 export const attestToMessage = (web3: Web3, messageBytes: string): string => {
-  // Create an attestation using the initialized Anvil keypair
-  const attesterPrivateKey = "0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97";
+  // Load the attester key from the local test environment.
+  const attesterPrivateKey = process.env.ATTESTER_PRIVATE_KEY;
+  if (!attesterPrivateKey) {
+    throw new Error("ATTESTER_PRIVATE_KEY must be set to generate test attestations");
+  }
 
   const messageHash = web3.utils.keccak256(messageBytes);
   const signedMessage = ethutil.ecsign(
@@ -121,7 +135,7 @@ export const receiveEvm = async (
     .receiveMessage(message, attestation)
     .send({ from: evmTestAddress });
 
-  const destinationLogs = await destination.messageTransmitterContract.getPastEvents("MessageReceived", {
+  const destinationLogs = await readPastEvents(destination.messageTransmitterContract)("MessageReceived", {
     fromBlock: destinationFrom,
     toBlock: BigInt(destinationTxReceipt.blockNumber) + BigInt(1),
   });
