@@ -8,3 +8,8 @@ logs
 
 .yarn
 .coverage_map.mvcov
+
+# Local environment files must never be committed.
+.env
+.env.*
+!.env.example
