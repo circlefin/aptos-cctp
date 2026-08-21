@@ -34,17 +34,49 @@ import { CctpExtensionsClient } from "../../typescript/aptos/client/cctpExtensio
 import { StablecoinHandlerClient } from "../../typescript/aptos/client/stablecoinHandlerClient";
 import { Web3 } from "web3";
 import * as ethutil from "@ethereumjs/util";
-import { afterAll, beforeAll, describe, expect, jest, test } from "@jest/globals";
+import { beforeAll, describe, expect, jest, test } from "@jest/globals";
 import dotenv from "dotenv";
 import { TokenMessengerMinterClientV2 } from "../../typescript/aptos/client/tokenMessengerMinterClientV2";
 import {
   generateFundedAccount,
   getAptosClient,
-  getPackageBytecode,
   normalizeAddress,
 } from "../../typescript/aptos/utils/helper";
 import { StablecoinClient } from "../../typescript/aptos/client/stablecoinClient";
 import { fail } from "node:assert";
+
+type DepositForBurnEventData = {
+  amount: string;
+  burn_token: string;
+  depositor: string;
+  destination_caller: string;
+  destination_domain: number;
+  destination_token_messenger: string;
+  hook_data: string;
+  max_fee: string;
+  min_finality_threshold: number;
+  mint_recipient: string;
+};
+
+type MessageSentEventData = {
+  message: string;
+};
+
+type MessageReceivedEventData = {
+  caller: string;
+  finality_threshold_executed: number;
+  message_body: string;
+  nonce: string;
+  sender: string;
+  source_domain: number;
+};
+
+type MintAndWithdrawEventData = {
+  amount: string;
+  fee_collected: string;
+  mint_token: string;
+  mint_recipient: string;
+};
 
 // =====================================================
 // Helper Functions for V2 Message Serialization
@@ -169,12 +201,15 @@ function serializeMessageV2(params: {
 }
 
 /**
- * Generate attestation using the configured attester private key
- * Uses keccak256 hash and ECDSA signature
+ * Generate an attestation using the configured attester private key.
+ * The message is hashed with keccak256 and signed with ECDSA.
  */
 function generateAttestation(web3: Web3, messageBytes: Uint8Array): Uint8Array {
-  // Attester private key from Anvil (same as used in EVM setup)
-  const attesterPrivateKey = "0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97";
+  // Read the attester key from the local test environment instead of source code.
+  const attesterPrivateKey = process.env.ATTESTER_PRIVATE_KEY;
+  if (!attesterPrivateKey) {
+    throw new Error("ATTESTER_PRIVATE_KEY must be set to generate test attestations");
+  }
 
   // Hash the message using keccak256
   const messageHex = "0x" + Buffer.from(messageBytes).toString("hex");
@@ -362,9 +397,6 @@ describe("End to End Tests", () => {
 
   beforeAll(async () => {
     await setupAptos();
-  });
-
-  afterAll(async () => {
   });
 
   describe("Admin Functions", () => {
@@ -1050,7 +1082,7 @@ describe("End to End Tests", () => {
 
       // Verify DepositForBurn event fields
       // Note: Aptos may drop leading zeros in address representation
-      const depositEventData = (depositForBurnEvent as any).data;
+      const depositEventData = (depositForBurnEvent as { data: DepositForBurnEventData }).data;
       expect(depositEventData.amount).toBe(amount.toString());
       // burn_token is the stablecoin's object address
       expect(
@@ -1104,7 +1136,7 @@ describe("End to End Tests", () => {
       });
 
       const expectedMessageHex = "0x" + Buffer.from(expectedMessage).toString("hex");
-      expect((messageSentEvent as any).data.message).toBe(expectedMessageHex);
+      expect((messageSentEvent as { data: MessageSentEventData }).data.message).toBe(expectedMessageHex);
     });
 
     test("APTOS -> EVM: deposit_for_burn with zero destinationCaller", async () => {
@@ -1148,7 +1180,7 @@ describe("End to End Tests", () => {
 
       // Verify destinationCaller is zero in the event
       // Note: Aptos may return "0x0" for zero address instead of full form
-      const depositEventData = (depositForBurnEvent as any).data;
+      const depositEventData = (depositForBurnEvent as { data: DepositForBurnEventData }).data;
       expect(
         depositEventData.destination_caller.toLowerCase().replace(/^0x0*/, "0x")
       ).toBe("0x");
@@ -1184,7 +1216,7 @@ describe("End to End Tests", () => {
       });
 
       const expectedMessageHex = "0x" + Buffer.from(expectedMessage).toString("hex");
-      expect((messageSentEvent as any).data.message).toBe(expectedMessageHex);
+      expect((messageSentEvent as { data: MessageSentEventData }).data.message).toBe(expectedMessageHex);
     });
 
     test("APTOS -> EVM: deposit_for_burn_with_hook", async () => {
@@ -1245,7 +1277,7 @@ describe("End to End Tests", () => {
 
       // Verify DepositForBurn event fields including hook_data
       // Note: Aptos may drop leading zeros in address representation
-      const depositEventData = (depositForBurnEvent as any).data;
+      const depositEventData = (depositForBurnEvent as { data: DepositForBurnEventData }).data;
       expect(depositEventData.amount).toBe(amount.toString());
       // burn_token is the stablecoin's object address
       expect(
@@ -1298,7 +1330,7 @@ describe("End to End Tests", () => {
       });
 
       const expectedMessageHex = "0x" + Buffer.from(expectedMessage).toString("hex");
-      expect((messageSentEvent as any).data.message).toBe(expectedMessageHex);
+      expect((messageSentEvent as { data: MessageSentEventData }).data.message).toBe(expectedMessageHex);
     });
 
     test("APTOS -> EVM: send_message (general message)", async () => {
@@ -1345,7 +1377,7 @@ describe("End to End Tests", () => {
       });
 
       const expectedMessageHex = "0x" + Buffer.from(expectedMessage).toString("hex");
-      expect((messageSentEvent as any).data.message).toBe(expectedMessageHex);
+      expect((messageSentEvent as { data: MessageSentEventData }).data.message).toBe(expectedMessageHex);
     });
 
     test("EVM -> APTOS: receive_message", async () => {
@@ -1438,7 +1470,7 @@ describe("End to End Tests", () => {
       console.log("MessageReceived event:", JSON.stringify(messageReceivedEvent, null, 2));
 
       // Verify MessageReceived event with full object comparison
-      expect((messageReceivedEvent as any).data).toEqual(expect.objectContaining({
+      expect((messageReceivedEvent as { data: MessageReceivedEventData }).data).toEqual(expect.objectContaining({
         caller: expect.any(String),
         finality_threshold_executed: finalityThresholdExecuted,
         message_body: expect.stringMatching(/^0x[0-9a-f]+$/i),
@@ -1455,7 +1487,7 @@ describe("End to End Tests", () => {
       // Note: Aptos may drop leading zeros in address representation
       // amount = tokens deposited to recipient (amount - fee from burn message)
       // fee_collected = tokens deposited to fee_recipient (fee_executed from burn message)
-      const mintEventData = (mintAndWithdrawEvent as any).data;
+      const mintEventData = (mintAndWithdrawEvent as { data: MintAndWithdrawEventData }).data;
       expect(mintEventData.amount).toBe((amount - expectedFee).toString());
       expect(mintEventData.fee_collected).toBe(expectedFee.toString());
       expect(

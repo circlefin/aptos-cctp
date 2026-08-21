@@ -25,6 +25,10 @@ export const FINALITY_THRESHOLD_FINALIZED = 2000;
 export const FINALITY_THRESHOLD_CONFIRMED = 1000;
 
 const IRIS_API_URL = process.env.IRIS_API_URL || "https://iris-api-sandbox.circle.com";
+const ATTESTATION_POLL_INTERVAL_MS = 2_000;
+const MAX_ATTESTATION_POLL_ATTEMPTS = 90;
+const RECEIPT_POLL_INTERVAL_MS = 4_000;
+const MAX_RECEIPT_POLL_ATTEMPTS = 60;
 
 export function getRequiredEnv(name: string): string {
   const value = process.env[name];
@@ -43,28 +47,47 @@ export async function fetchAttestation(
   const url = `${IRIS_API_URL}/v2/messages/${sourceDomain}?transactionHash=${txHash}`;
   console.log(`Polling Iris V2 API for attestation: ${url}`);
 
-  while (true) {
+  for (let attempt = 0; attempt < MAX_ATTESTATION_POLL_ATTEMPTS; attempt += 1) {
     const response = await fetch(url);
-    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(
+        `Iris V2 API request failed with ${response.status} ${response.statusText}`,
+      );
+    }
 
-    if (data.messages?.[0]?.attestation && data.messages[0].attestation !== "PENDING") {
+    const data = await response.json();
+    const message = data.messages?.[0];
+    if (message?.attestation && message.attestation !== "PENDING") {
       console.log("Attestation received from Iris V2 API.");
       return {
-        message: data.messages[0].message,
-        attestation: data.messages[0].attestation,
+        message: message.message,
+        attestation: message.attestation,
       };
     }
 
-    await new Promise((r) => setTimeout(r, 2_000));
+    await new Promise((resolve) => setTimeout(resolve, ATTESTATION_POLL_INTERVAL_MS));
   }
+
+  throw new Error(
+    `Attestation was not available after ${MAX_ATTESTATION_POLL_ATTEMPTS} attempts`,
+  );
 }
 
 // Polls getTransactionReceipt until the transaction is mined, then asserts success.
 export async function waitForEvmTransaction(web3: Web3, txHash: string) {
   let receipt = await web3.eth.getTransactionReceipt(txHash);
-  while (receipt == null) {
-    await new Promise((r) => setTimeout(r, 4_000));
+  for (
+    let attempt = 1;
+    receipt == null && attempt <= MAX_RECEIPT_POLL_ATTEMPTS;
+    attempt += 1
+  ) {
+    await new Promise((resolve) => setTimeout(resolve, RECEIPT_POLL_INTERVAL_MS));
     receipt = await web3.eth.getTransactionReceipt(txHash);
+  }
+  if (receipt == null) {
+    throw new Error(
+      `Transaction receipt was not available after ${MAX_RECEIPT_POLL_ATTEMPTS} attempts: ${txHash}`,
+    );
   }
   if (receipt.status !== BigInt(1)) {
     throw new Error(`Transaction reverted: ${txHash}`);

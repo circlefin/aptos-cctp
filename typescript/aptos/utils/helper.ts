@@ -76,7 +76,10 @@ export async function generateFundedAccountFromPrivateKey(
  */
 export function getEventByType(txOutput: UserTransactionResponse, eventType: string): Event {
   const normalizedType = normalizeEventType(eventType);
-  const event = txOutput.events.find((e: any) => normalizeEventType(e.type) === normalizedType);
+  const event = txOutput.events.find((candidate) => normalizeEventType(candidate.type) === normalizedType);
+  if (!event) {
+    throw new Error(`Event not found in transaction output: ${eventType}`);
+  }
   return event;
 }
 
