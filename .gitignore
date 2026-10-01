@@ -8,3 +8,9 @@ logs
 
 .yarn
 .coverage_map.mvcov
+
+# Local environment files. The tracked .env held EVM deployer private keys;
+# copy .env.example to .env instead.
+.env
+.env.*
+!.env.example
